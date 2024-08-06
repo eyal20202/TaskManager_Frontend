@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/useStores';
 import { Button, TextField, Grid, Paper, Typography, Switch, FormControlLabel, Snackbar, Alert } from '@mui/material';
+import { format } from 'date-fns';
 
 const TaskForm = observer(({ selectedTask, onClearSelection }) => {
   const { taskStore } = useStores();
@@ -10,14 +11,17 @@ const TaskForm = observer(({ selectedTask, onClearSelection }) => {
   const [dueDate, setDueDate] = useState('');
   const [isCompleted, setIsCompleted] = useState(false);
   const [error, setError] = useState(null);
+  const [id, setId] = useState(null);
 
   useEffect(() => {
     if (selectedTask) {
+      setId(selectedTask.id);
       setTitle(selectedTask.title);
       setDescription(selectedTask.description);
-      setDueDate(selectedTask.dueDate);
+      setDueDate(format(new Date(selectedTask.dueDate), 'yyyy-MM-dd'));
       setIsCompleted(selectedTask.isCompleted);
     } else {
+      setId(null);
       setTitle('');
       setDescription('');
       setDueDate('');
@@ -31,13 +35,15 @@ const TaskForm = observer(({ selectedTask, onClearSelection }) => {
       setError('Please fill in all required fields');
       return;
     }
-    const task = { title, description, dueDate, isCompleted };
+    let task = { title, description, dueDate, isCompleted };
     try {
       if (selectedTask) {
+        task = {...task,id};
         await taskStore.updateTask(selectedTask.id, task);
       } else {
         await taskStore.addTask(task);
       }
+      setId(null);
       setTitle('');
       setDescription('');
       setDueDate('');

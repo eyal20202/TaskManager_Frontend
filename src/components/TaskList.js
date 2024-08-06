@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { observer } from 'mobx-react-lite';
 import { useStores } from '../stores/useStores';
 import TaskForm from './TaskForm';
@@ -12,8 +12,12 @@ const TaskList = observer(() => {
   const { taskStore } = useStores();
   const [selectedTask, setSelectedTask] = useState(null);
 
-  const handleDelete = (id) => {
-    taskStore.deleteTask(id);
+  useEffect(() => {
+    taskStore.fetchTasks();
+  }, [taskStore]);
+
+  const handleDelete = async (id) => {
+    await taskStore.deleteTask(id);
   };
 
   const handleEdit = (task) => {
